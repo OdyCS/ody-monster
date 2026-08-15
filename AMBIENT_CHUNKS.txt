@@ -1,0 +1,13 @@
+GITHUB-FRIENDLY FULL AMBIENCE
+
+The original ambient-full.mp3 has been split into 9 MP3 files in /audio/:
+  ambient-full-01.mp3 ... ambient-full-09.mp3
+
+Every individual file is below GitHub's 25 MB browser-upload ceiling.
+Chunks 01-08 are ~450 seconds and intentionally overlap the next chunk by
+5 seconds. index.html crossfades across that overlap so they behave like one
+continuous 63-minute ambience track.
+
+Upload ALL NINE files and keep their filenames unchanged.
+The site automatically prefers these chunks. If they are unavailable, it
+falls back to ambient-a.mp3 / ambient-b.mp3.

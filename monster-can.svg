@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 760">
+<defs><linearGradient id="c" x1="0" x2="1"><stop stop-color="#aaa"/><stop offset=".18" stop-color="#fff"/><stop offset=".7" stop-color="#eee"/><stop offset="1" stop-color="#999"/></linearGradient></defs>
+<ellipse cx="140" cy="48" rx="101" ry="30" fill="#bbb"/><rect x="39" y="48" width="202" height="650" rx="50" fill="url(#c)"/><ellipse cx="140" cy="698" rx="101" ry="30" fill="#aaa"/>
+<path d="M87 180 L118 150 L131 285 L150 168 L174 147 L158 335 L133 307 L115 352 Z" fill="#111"/>
+<text x="140" y="445" text-anchor="middle" font-family="Arial" font-size="38" font-weight="800" fill="#111" letter-spacing="5">MONSTER</text>
+<text x="140" y="490" text-anchor="middle" font-family="Arial" font-size="18" font-weight="700" fill="#777" letter-spacing="6">ENERGY</text>
+<text x="140" y="560" text-anchor="middle" font-family="Arial" font-size="20" font-weight="700" fill="#8aa6b4" letter-spacing="8">ULTRA</text>
+</svg>

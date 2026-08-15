@@ -1,0 +1,37 @@
+ODY.MONSTER — AUDIO DESIGN
+
+The site deliberately does NOT play every uploaded sound at once.
+
+The warning/ENTER click starts the entire sound engine and unlocks browser audio.
+From that point the layers are scheduled independently so the visitor cannot easily
+learn the pattern.
+
+BASE:
+- ambient-a / ambient-b: two 60-second dark-ambient excerpts, crossfaded continuously.
+
+WHISPER LAYER:
+- four voices with echo: spectral swarm / far voices.
+- 27-second male whisper: low and close/far fragments.
+- reversed whispers: unstable transitional texture.
+
+IMAGE MICRO-CUES:
+Every image may receive a different tiny cue: breath at the ear, a fragment of whisper,
+teeth, violin scrape, low bass movement, or occasionally no obvious transient.
+This avoids the repeated 'same screech every image' effect.
+
+RARE WORLD EVENTS:
+- demonic moan: distant low presence.
+- suffocating man: filtered and reverberant, short fragments.
+- dragging metal: far spatial intrusion.
+- bells: long, very quiet ominous layer.
+- distant distorted scream: repaired from left-only to stereo, heavily lowered and reverberated.
+- crying: strongly lowered, filtered and reverberated to behave like distant weeping.
+
+CHOIR:
+- creepy multi-voice choir: 3–6 second incursions, often starting from the middle.
+- horror choir transition: short punctuation only and used rarely.
+
+DYNAMICS:
+The page periodically enters a short escalation state, then a deliberate lull.
+A master compressor prevents overlapping random events from suddenly summing into
+an excessively loud output.

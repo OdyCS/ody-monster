@@ -1,0 +1,52 @@
+ODY.MONSTER — SOUND PHILOSOPHY V5
+
+The sound system is intentionally hierarchical instead of random spam.
+
+1. AMBIENT WORLD
+   - ambient-a / ambient-b remain the default crossfading bed.
+   - OPTIONAL: put a full ambience file at audio/ambient-full.mp3.
+     If present, the page automatically prefers it as the continuous looping bed.
+
+2. CLOSE PRESENCE
+   - exhale is louder and slightly more frequent.
+   - whisper-close is used in short near-ear fragments.
+   - OPTIONAL: audio/whisper-close2.mp3 is automatically added as another near-ear source if present.
+
+3. DISTANT VOICES
+   - whisper-swarm is layered 2–3 times with different volume, pan, timing, pitch, and source offset.
+   - the final 5 seconds of whisper-swarm are NEVER selected.
+   - reversed whispers may sit faintly underneath.
+
+4. RECURRING MOTIFS
+   - bells are now a stronger recurring motif.
+   - metal drag stays atmospheric and sparse.
+
+5. HUMAN FRAGILITY
+   - suffocating man is used more meaningfully and at longer lengths.
+   - crying remains rare and distant.
+
+6. HIDDEN PERSONAL TRACE
+   - male-whisper is treated as a hidden gem: random sections, random lengths, widely spaced appearances.
+
+7. RUPTURE
+   - choir-chaos is delayed roughly a minute and becomes a true escalation event.
+   - violin scrape, bass impact, distant scream and choir-sting only appear as rare accents inside ruptures.
+   - choir-sting never uses the silent last 2 seconds.
+   - after rupture, the page deliberately enters a quiet/lull period.
+
+8. TEETH
+   - removed from ordinary image cues.
+   - extremely rare low-level event only.
+
+9. MOAN
+   - removed entirely from code and package.
+
+DEBUG
+   Press D while the page is open.
+   Debug now lists EVERY currently active sound simultaneously, including file name, gain, pan, offset and duration.
+
+TAB ICON
+   Replace tab-icon.png with any square PNG you want as the browser-tab favicon.
+
+CORNER MARK
+   Small "Ody" mark is placed in the top-left corner.

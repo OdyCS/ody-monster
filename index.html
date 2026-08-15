@@ -1,0 +1,1493 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ody.monster</title>
+<link rel="icon" type="image/png" href="tab-icon.png">
+<style>
+:root{
+  --blood:#e11919;
+  --deep:#030000;
+  --paper:#f4ecec;
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#020000}
+body{color:var(--paper);font-family:Georgia,"Times New Roman",serif}
+button{font:inherit}
+
+#world{
+  position:fixed;inset:0;overflow:hidden;
+  background:
+    radial-gradient(circle at 50% 50%,rgba(145,0,0,.24),transparent 39%),
+    radial-gradient(circle at 50% 50%,#1c0000,#070000 52%,#010000);
+}
+#ritual{position:absolute;inset:0;width:100%;height:100%;z-index:2}
+
+#tripField{
+  position:absolute;inset:-14%;z-index:3;pointer-events:none;opacity:.10;
+  background:
+    repeating-conic-gradient(
+      from 0deg at 50% 50%,
+      rgba(255,0,0,.035) 0deg 5deg,
+      transparent 5deg 15deg
+    ),
+    radial-gradient(circle at 50% 50%,transparent 0 23%,rgba(255,0,0,.055) 31%,transparent 52%);
+  mix-blend-mode:screen;
+  filter:blur(1px);
+  transform-origin:50% 50%;
+  will-change:transform,filter,opacity;
+}
+#tripTunnel{
+  position:absolute;inset:-8%;z-index:22;pointer-events:none;opacity:0;
+  background:
+    radial-gradient(ellipse at 50% 50%,transparent 0 23%,rgba(255,18,18,.05) 38%,rgba(0,0,0,.18) 71%,rgba(0,0,0,.42) 100%);
+  mix-blend-mode:screen;
+  will-change:opacity,transform,filter;
+}
+#chromaticGhost{
+  position:absolute;inset:-5px;z-index:21;pointer-events:none;opacity:0;
+  background:
+    linear-gradient(90deg,rgba(255,0,0,.10),transparent 28%,transparent 70%,rgba(60,0,255,.045));
+  mix-blend-mode:screen;
+  will-change:opacity,transform;
+}
+
+.heading{
+  position:absolute;z-index:15;left:50%;top:2.2vh;transform:translateX(-50%);
+  width:min(1080px,94vw);text-align:center;pointer-events:none;
+  transform-origin:50% 25%;
+  will-change:transform,filter,opacity;
+}
+.eyebrow{
+  font:700 10px/1 Arial,sans-serif;
+  letter-spacing:.55em;color:rgba(190,120,120,.46);margin-bottom:14px;
+}
+h1{
+  margin:0;
+  font-size:clamp(2rem,5vw,5.15rem);
+  line-height:.94;letter-spacing:-.045em;
+  text-shadow:0 0 18px rgba(255,0,0,.25),0 0 60px rgba(120,0,0,.18);
+}
+
+#apparitions{position:absolute;inset:0;z-index:7;pointer-events:none;overflow:hidden}
+.apparition{
+  position:absolute;opacity:0;object-fit:contain;pointer-events:none;user-select:none;
+  will-change:transform,opacity,filter;
+  transform-origin:center;
+  mix-blend-mode:screen;
+  filter:
+    saturate(1.35)
+    contrast(1.30)
+    brightness(.72)
+    drop-shadow(0 0 25px rgba(255,0,0,.48));
+}
+#fullVision{
+  position:absolute;inset:-4%;z-index:6;opacity:0;width:108%;height:108%;object-fit:cover;
+  pointer-events:none;mix-blend-mode:screen;
+  filter:contrast(1.22) saturate(1.2) brightness(.48);
+  -webkit-mask-image:radial-gradient(ellipse,#000 25%,rgba(0,0,0,.72) 55%,transparent 91%);
+  mask-image:radial-gradient(ellipse,#000 25%,rgba(0,0,0,.72) 55%,transparent 91%);
+}
+
+#centerWrap{
+  position:absolute;z-index:18;left:50%;top:50%;
+  transform:translate(-50%,-50%);
+  width:min(17vw,195px);min-width:108px;
+  aspect-ratio:1/1;
+  pointer-events:none;
+  border-radius:50%;
+  isolation:isolate;
+}
+/* Center-only change: every cycle image is treated like one object inside
+   the ritual instead of a rectangular photo pasted over it. */
+#centerWrap::before{
+  content:"";position:absolute;inset:-24%;z-index:-2;border-radius:50%;
+  background:
+    radial-gradient(circle,
+      rgba(255,255,255,.11) 0%,
+      rgba(255,28,28,.22) 20%,
+      rgba(135,0,0,.17) 42%,
+      rgba(75,0,0,.08) 60%,
+      transparent 76%);
+  filter:blur(13px);
+}
+#centerWrap::after{
+  content:"";position:absolute;inset:-9%;z-index:4;border-radius:50%;
+  border:1px solid rgba(245,40,40,.23);
+  box-shadow:
+    0 0 22px rgba(255,0,0,.28),
+    inset 0 0 25px rgba(255,0,0,.10);
+  background:radial-gradient(circle,
+    transparent 0 46%,
+    rgba(160,0,0,.08) 62%,
+    rgba(90,0,0,.24) 78%,
+    transparent 100%);
+}
+.center-img{
+  position:absolute;left:50%;top:50%;z-index:1;
+  transform:translate(-50%,-50%);
+  width:100%;height:100%;
+  object-fit:cover;opacity:0;
+  border-radius:50%;
+  mix-blend-mode:screen;
+  -webkit-mask-image:radial-gradient(circle,
+    #000 0 52%,rgba(0,0,0,.96) 63%,rgba(0,0,0,.62) 76%,transparent 91%);
+  mask-image:radial-gradient(circle,
+    #000 0 52%,rgba(0,0,0,.96) 63%,rgba(0,0,0,.62) 76%,transparent 91%);
+  filter:
+    grayscale(.22)
+    sepia(.44)
+    saturate(1.42)
+    contrast(1.13)
+    brightness(.78)
+    drop-shadow(0 0 8px rgba(255,255,255,.10))
+    drop-shadow(0 0 28px rgba(255,0,0,.68))
+    drop-shadow(0 0 82px rgba(135,0,0,.48));
+  transition:opacity .10s linear,filter .14s ease;
+}
+.center-img.active{opacity:.96}
+
+/* Optional illusion image: drop ONE image into /illusion/ as
+   illusion.png, illusion.jpg, illusion.jpeg, illusion.webp, or illusion.gif.
+   It stays completely invisible until the center cycle reaches its locked
+   maximum speed, then slowly fades over the still-cycling images. */
+.illusion-img{
+  position:absolute;left:50%;top:50%;z-index:3;
+  transform:translate(-50%,-50%) scale(.96);
+  width:112%;height:112%;object-fit:cover;
+  border-radius:50%;opacity:0;pointer-events:none;
+  mix-blend-mode:screen;
+  -webkit-mask-image:radial-gradient(circle,
+    #000 0 46%,rgba(0,0,0,.98) 58%,rgba(0,0,0,.62) 76%,transparent 92%);
+  mask-image:radial-gradient(circle,
+    #000 0 46%,rgba(0,0,0,.98) 58%,rgba(0,0,0,.62) 76%,transparent 92%);
+  filter:
+    grayscale(.20)
+    sepia(.52)
+    saturate(1.55)
+    contrast(1.12)
+    brightness(.72)
+    drop-shadow(0 0 18px rgba(255,0,0,.34));
+  transition:opacity 3.2s ease,transform 5s ease,filter 3.2s ease;
+}
+.illusion-img.visible{
+  opacity:.42;
+  transform:translate(-50%,-50%) scale(1);
+  filter:
+    grayscale(.18)
+    sepia(.56)
+    saturate(1.62)
+    contrast(1.13)
+    brightness(.75)
+    drop-shadow(0 0 22px rgba(255,0,0,.42));
+  animation:illusionBreathe 8s ease-in-out 3.2s infinite alternate;
+}
+@keyframes illusionBreathe{
+  from{opacity:.34;transform:translate(-50%,-50%) scale(.995)}
+  to{opacity:.46;transform:translate(-50%,-50%) scale(1.018)}
+}
+
+#fallbackMonster{
+  position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(circle,rgba(80,0,0,.16),rgba(0,0,0,.82) 66%,transparent 86%);
+}
+
+#softFlash{
+  position:absolute;inset:0;z-index:23;pointer-events:none;opacity:0;
+  background:radial-gradient(circle at 50% 50%,rgba(255,35,35,.16),rgba(110,0,0,.04) 40%,transparent 70%);
+  mix-blend-mode:screen;
+}
+#blackBlink{position:absolute;inset:0;z-index:24;pointer-events:none;opacity:0;background:#000}
+.popFlash{
+  position:absolute;pointer-events:none;border-radius:50%;mix-blend-mode:screen;
+  background:
+    radial-gradient(circle,
+      rgba(255,255,255,.92) 0%,
+      rgba(255,244,238,.62) 12%,
+      rgba(255,190,180,.30) 30%,
+      rgba(255,90,90,.10) 51%,
+      transparent 73%);
+  filter:blur(4px);
+}
+.grain{
+  position:absolute;inset:0;z-index:38;pointer-events:none;opacity:.052;
+  background-image:repeating-radial-gradient(circle at 20% 30%,rgba(255,255,255,.68) 0 1px,transparent 1px 4px);
+  background-size:8px 8px;mix-blend-mode:overlay;
+}
+.vignette{
+  position:absolute;inset:0;z-index:40;pointer-events:none;
+  box-shadow:inset 0 0 110px 48px rgba(0,0,0,.94),inset 0 0 300px 110px rgba(60,0,0,.22);
+}
+
+
+#cornerOdy{
+  position:fixed;z-index:180;left:14px;top:11px;
+  color:rgba(235,214,214,.58);font:italic 700 13px/1 Georgia,"Times New Roman",serif;
+  letter-spacing:.08em;text-shadow:0 0 14px rgba(255,0,0,.18);
+  pointer-events:none;user-select:none;
+}
+
+/* Entry gate: its click unlocks browser audio. */
+#gate{
+  position:fixed;inset:0;z-index:1000;
+  display:grid;place-items:center;
+  background:
+    radial-gradient(circle at 50% 50%,rgba(70,0,0,.20),transparent 42%),
+    rgba(2,0,0,.975);
+  transition:opacity .9s ease,visibility .9s;
+}
+#gate.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.gate-card{
+  width:min(620px,88vw);text-align:center;padding:42px 34px 38px;
+  border:1px solid rgba(210,45,45,.22);border-radius:20px;
+  background:rgba(13,0,0,.66);box-shadow:0 0 80px rgba(130,0,0,.16);
+}
+.gate-mark{font:700 11px Arial,sans-serif;letter-spacing:.42em;color:#ad6d6d;margin-bottom:24px}
+.gate-card h2{font-size:clamp(1.6rem,4vw,2.8rem);margin:0 0 16px}
+.gate-card p{
+  margin:0 auto 26px;max-width:510px;color:#c4a8a8;
+  font:400 14px/1.65 Arial,sans-serif;
+}
+#enter{
+  border:1px solid rgba(255,75,75,.34);border-radius:10px;
+  padding:12px 27px;background:#220303;color:#eee;cursor:pointer;
+  font:700 12px Arial,sans-serif;letter-spacing:.16em;
+}
+#enter:hover{background:#320505}
+#loadState{
+  display:block;margin-top:13px;color:#8f6262;
+  font:600 9px Arial,sans-serif;letter-spacing:.12em;
+}
+#loadState.error{color:#e27b7b}
+
+/* Only remaining sound control. */
+#mute{
+  position:fixed;z-index:200;right:14px;bottom:13px;
+  width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,70,70,.19);
+  background:rgba(7,0,0,.76);color:#d9caca;cursor:pointer;
+  backdrop-filter:blur(8px);opacity:.68;
+}
+#mute:hover{opacity:1}
+
+@media(max-width:700px){
+  h1{font-size:clamp(1.75rem,8vw,3rem)}
+  #centerWrap{top:50%;width:min(23vw,130px)}
+  .gate-card{padding:34px 24px 30px}
+}
+</style>
+</head>
+
+<body>
+<div id="world">
+  <canvas id="ritual"></canvas>
+  <div id="tripField"></div>
+  <img id="fullVision" src="assets/hell-collage.png" alt="">
+  <div id="apparitions"></div>
+
+
+  <div id="centerWrap">
+    <div id="fallbackMonster" aria-hidden="true"></div>
+    <img id="illusionImage" class="illusion-img" alt="" aria-hidden="true">
+  </div>
+
+  <div id="chromaticGhost"></div>
+  <div id="tripTunnel"></div>
+  <div id="softFlash"></div>
+  <div id="blackBlink"></div>
+  <div class="grain"></div>
+  <div class="vignette"></div>
+</div>
+
+<div id="gate">
+  <div class="gate-card">
+    <div class="gate-mark">ODY.MONSTER</div>
+    <h2>Epilepsy / photosensitivity warning</h2>
+    <p>
+      This page contains flashing and rapidly changing imagery, disturbing horror imagery,
+      sudden visual effects, and unsettling audio. Do not enter if you are sensitive to
+      flashing lights, seizures, migraines, or intense audiovisual horror.
+    </p>
+    <button id="enter">I UNDERSTAND — ENTER</button>
+    <span id="loadState">PREPARING AUDIO…</span>
+  </div>
+</div>
+
+<div id="cornerOdy">Ody</div>
+<button id="mute" title="Mute / unmute" aria-label="Mute or unmute">🔊</button>
+
+<script>
+/* ================================================================
+   STATE / HELPERS
+   ================================================================ */
+let experienceStarted=false;
+let muted=false;
+let intensityUntil=0;
+let lullUntil=0;
+
+/* "Bad trip" intensity is deliberately continuous rather than a strobe.
+   It rises during hallucination surges and slowly relaxes during lulls. */
+let tripLevel=0;
+let tripTarget=.10;
+let lastTripKick=0;
+
+const rand=(a,b)=>a+Math.random()*(b-a);
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+/* ================================================================
+   RITUAL CANVAS
+   All movement is updated through requestAnimationFrame.
+   ================================================================ */
+const canvas=document.getElementById("ritual");
+const ctx=canvas.getContext("2d");
+let W=0,H=0,DPR=Math.min(devicePixelRatio||1,2);
+
+function resize(){
+  W=innerWidth;H=innerHeight;
+  canvas.width=Math.floor(W*DPR);canvas.height=Math.floor(H*DPR);
+  canvas.style.width=W+"px";canvas.style.height=H+"px";
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+addEventListener("resize",resize);resize();
+
+const glyphs=["⛧","☿","☽","♄","☉","✶","⛥","☾","✦","†","⊕","△","◬","◉","♁","♆"];
+function circle(r,a,w=1){
+  ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);
+  ctx.strokeStyle=`rgba(230,30,30,${a})`;ctx.lineWidth=w;
+  ctx.shadowColor="rgba(255,0,0,.78)";ctx.shadowBlur=9;ctx.stroke();
+}
+function star(n,r,rot,a,w=1){
+  ctx.save();ctx.rotate(rot);ctx.beginPath();
+  for(let i=0;i<=n;i++){
+    const k=(i*2)%n,q=-Math.PI/2+k*Math.PI*2/n;
+    const x=Math.cos(q)*r,y=Math.sin(q)*r;
+    i?ctx.lineTo(x,y):ctx.moveTo(x,y);
+  }
+  ctx.strokeStyle=`rgba(235,35,35,${a})`;ctx.lineWidth=w;
+  ctx.shadowColor="#f00";ctx.shadowBlur=8;ctx.stroke();ctx.restore();
+}
+function runes(r,ang,count,a,size){
+  ctx.save();ctx.rotate(ang);
+  ctx.font=`${size}px Georgia`;ctx.textAlign="center";ctx.textBaseline="middle";
+  ctx.fillStyle=`rgba(245,50,50,${a})`;ctx.shadowColor="#f00";ctx.shadowBlur=9;
+  for(let i=0;i<count;i++){
+    const q=i*Math.PI*2/count;
+    ctx.save();ctx.rotate(q);ctx.translate(0,-r);ctx.rotate(Math.PI);
+    ctx.fillText(glyphs[i%glyphs.length],0,0);ctx.restore();
+  }
+  ctx.restore();
+}
+function ticks(r,count,ang,a){
+  ctx.save();ctx.rotate(ang);ctx.strokeStyle=`rgba(210,30,30,${a})`;ctx.lineWidth=.8;
+  for(let i=0;i<count;i++){
+    const q=i*Math.PI*2/count;
+    ctx.save();ctx.rotate(q);ctx.beginPath();
+    ctx.moveTo(0,-r);ctx.lineTo(0,-r-10-(i%4===0?11:0));ctx.stroke();ctx.restore();
+  }
+  ctx.restore();
+}
+
+let last=performance.now(),rt=0,a1=0,a2=0,a3=0,a4=0,a5=0;
+function render(now){
+  if(!experienceStarted){requestAnimationFrame(render);return}
+  const dt=Math.min((now-last)/1000,.05);last=now;rt+=dt;
+
+  /* Ease into/out of altered states instead of switching them on like a filter. */
+  const nowMs=performance.now();
+  if(nowMs<lullUntil) tripTarget=.035;
+  else if(nowMs<intensityUntil) tripTarget=.86;
+  else tripTarget=.16;
+  tripLevel += (tripTarget-tripLevel)*Math.min(1,dt*1.25);
+
+  const speed=1+tripLevel*.72;
+  a1+=dt*.55*speed;
+  a2-=dt*.33*(1+tripLevel*.38);
+  a3+=dt*.82*(1+tripLevel*.95);
+  a4-=dt*.18*(1+tripLevel*.28);
+  a5+=dt*.13*(1+tripLevel*.22);
+  ctx.clearRect(0,0,W,H);
+
+  /* Keep the ritual locked to the exact screen center.
+     The bad-trip feeling should come from breathing / flicker / scale,
+     not from the whole sigil drifting off-center. */
+  const cx=W/2;
+  const cy=H*.50;
+  const base=Math.min(W,H),R=Math.min(base*(.44+tripLevel*.018),452);
+  const breath=
+    1+
+    Math.sin(rt*1.55)*(.018+tripLevel*.020)+
+    Math.sin(rt*.43)*tripLevel*.010;
+
+  ctx.save();ctx.translate(cx,cy);ctx.scale(breath,breath);
+
+  const G=Math.max(W,H)*.55;
+  ctx.save();ctx.rotate(a5);
+  circle(G,.13);circle(G*.91,.08,.7);runes(G*.965,0,50,.22,17);
+  star(9,G*.79,a4,.10,.8);ticks(G*.89,72,a4*.8,.13);
+  ctx.restore();
+
+  ctx.save();ctx.rotate(a1);
+  circle(R,.9,1.6);circle(R*.92,.48,.8);runes(R*.965,0,28,.94,20);
+  ticks(R*.87,40,0,.4);star(5,R*.73,0,.58,1.1);
+  ctx.restore();
+
+  ctx.save();ctx.rotate(a2);
+  circle(R*.77,.72,1.1);circle(R*.68,.34,.8);runes(R*.72,0,20,.75,16);
+  star(7,R*.55,Math.PI/7,.35,.85);
+  ctx.restore();
+
+  ctx.save();ctx.rotate(a3);
+  circle(R*.48,.68,.9);circle(R*.37,.28,.7);runes(R*.445,0,14,.76,15);
+  star(5,R*.31,Math.PI/5,.45,.85);
+  ctx.restore();
+
+  ctx.save();ctx.rotate(-a1*.24);
+  for(let i=0;i<16;i++){
+    const q=i*Math.PI*2/16;
+    ctx.beginPath();
+    ctx.moveTo(Math.cos(q)*R*.50,Math.sin(q)*R*.50);
+    ctx.lineTo(Math.cos(q)*R*.88,Math.sin(q)*R*.88);
+    ctx.strokeStyle="rgba(205,35,35,.19)";ctx.lineWidth=.7;ctx.stroke();
+  }
+  ctx.restore();
+
+  ctx.save();ctx.rotate(a2*.7);
+  for(let i=0;i<8;i++){
+    const q=i*Math.PI*2/8,rr=R*1.08;
+    ctx.beginPath();ctx.arc(Math.cos(q)*rr,Math.sin(q)*rr,3+(i%2)*2,0,Math.PI*2);
+    ctx.fillStyle="rgba(255,40,40,.76)";ctx.shadowColor="#f00";ctx.shadowBlur=14;ctx.fill();
+  }
+  ctx.restore();
+
+  ctx.restore();
+  requestAnimationFrame(render);
+}
+requestAnimationFrame(render);
+
+/* ================================================================
+   VISUAL APPARITIONS
+   The PNG assets were feathered before packaging to remove the
+   rectangular edge, then are screen-blended into the red background.
+   ================================================================ */
+const apparitionSources=[1,2,3,4,5,6,7,8,9,10,11].map(i=>"assets/app-"+i+".png");
+const layer=document.getElementById("apparitions");
+const softFlash=document.getElementById("softFlash");
+const blackBlink=document.getElementById("blackBlink");
+const fullVision=document.getElementById("fullVision");
+const world=document.getElementById("world");
+const tripField=document.getElementById("tripField");
+const tripTunnel=document.getElementById("tripTunnel");
+const chromaticGhost=document.getElementById("chromaticGhost");
+const heading=document.querySelector(".heading");
+
+const spots=[
+  [-7,2],[72,1],[-6,35],[73,34],
+  [2,57],[70,56],[17,8],[54,6],
+  [8,28],[65,25],[23,48],[54,46]
+];
+
+function tripKick(strength=1,duration=null){
+  if(!experienceStarted)return;
+
+  const now=performance.now();
+  if(now-lastTripKick<240 && strength<1.15)return;
+  lastTripKick=now;
+
+  const s=clamp(strength,.35,1.55);
+  const d=duration||rand(720,1550);
+
+  tripField.animate([
+    {opacity:.08,transform:"scale(1) rotate(0deg)",filter:"blur(1px)"},
+    {opacity:.14+.10*s,offset:.23,transform:`scale(${1+.035*s}) rotate(${rand(-1.2,1.2)*s}deg)`,filter:`blur(${1+1.5*s}px)`},
+    {opacity:.07,transform:`scale(${1+.012*s}) rotate(${rand(-.35,.35)}deg)`,filter:"blur(1px)"}
+  ],{duration:d,easing:"cubic-bezier(.12,.75,.2,1)"});
+
+  tripTunnel.animate([
+    {opacity:0,transform:"scale(.94)",filter:"blur(9px)"},
+    {opacity:.10+.13*s,offset:.28,transform:`scale(${1+.05*s})`,filter:"blur(1px)"},
+    {opacity:.035,offset:.66,transform:`scale(${1+.02*s})`,filter:"blur(3px)"},
+    {opacity:0,transform:"scale(1.08)",filter:"blur(8px)"}
+  ],{duration:d*1.15,easing:"ease-out"});
+
+  chromaticGhost.animate([
+    {opacity:0,transform:"translate(0,0)"},
+    {opacity:.10+.10*s,offset:.20,transform:`translate(${rand(-7,7)*s}px,${rand(-3,3)*s}px)`},
+    {opacity:.035,offset:.52,transform:`translate(${rand(-3,3)}px,0)`},
+    {opacity:0,transform:"translate(0,0)"}
+  ],{duration:d*.82,easing:"ease-out"});
+
+  /* The page lurches in depth rather than merely shaking laterally. */
+  world.animate([
+    {transform:"perspective(1000px) translate3d(0,0,0) rotate(0deg) scale(1)",filter:"contrast(1) saturate(1)"},
+    {transform:`perspective(1000px) translate3d(${rand(-8,8)*s}px,${rand(-5,5)*s}px,${20*s}px) rotate(${rand(-.8,.8)*s}deg) scale(${1+.010*s})`,filter:`contrast(${1+.14*s}) saturate(${1+.13*s})`,offset:.24},
+    {transform:`perspective(1000px) translate3d(${rand(-3,3)}px,${rand(-2,2)}px,0) rotate(${rand(-.2,.2)}deg) scale(1.002)`,filter:"contrast(1.04) saturate(1.03)",offset:.64},
+    {transform:"perspective(1000px) translate3d(0,0,0) rotate(0deg) scale(1)",filter:"contrast(1) saturate(1)"}
+  ],{duration:d,easing:"cubic-bezier(.08,.78,.22,1)"});
+
+  if(heading && Math.random()<.58){
+    heading.animate([
+      {transform:"translateX(-50%) scale(1)",filter:"blur(0)"},
+      {transform:`translateX(calc(-50% + ${rand(-5,5)*s}px)) scale(${1+.010*s}) skewX(${rand(-.8,.8)*s}deg)`,filter:`blur(${rand(.25,1.0)*s}px)`,offset:.28},
+      {transform:"translateX(-50%) scale(1)",filter:"blur(0)"}
+    ],{duration:d*.72,easing:"ease-out"});
+  }
+}
+
+function localizedFlash(px,py,size){
+  softFlash.animate(
+    [{opacity:0},{opacity:rand(.10,.22),offset:.12},{opacity:.02,offset:.42},{opacity:0}],
+    {duration:rand(280,520),easing:"cubic-bezier(.05,.8,.2,1)"}
+  );
+
+  const flare=document.createElement("div");
+  flare.className="popFlash";
+  flare.style.left=(px-size*.55)+"px";
+  flare.style.top=(py-size*.55)+"px";
+  flare.style.width=(size*1.1)+"px";
+  flare.style.height=(size*1.1)+"px";
+  layer.appendChild(flare);
+
+  flare.animate([
+    {opacity:0,transform:"scale(.30)"},
+    {opacity:rand(.72,.94),offset:.12,transform:"scale(.94)"},
+    {opacity:.18,offset:.33,transform:"scale(1.18)"},
+    {opacity:0,transform:"scale(1.46)"}
+  ],{
+    duration:rand(230,390),
+    easing:"cubic-bezier(.02,.82,.18,1)",
+    fill:"forwards"
+  }).finished.finally(()=>flare.remove());
+
+  world.animate([
+    {transform:"translate(0,0) scale(1)"},
+    {transform:`translate(${rand(-6,6)}px,${rand(-4,4)}px) scale(${rand(1.002,1.008)})`},
+    {transform:"translate(0,0) scale(1)"}
+  ],{duration:rand(180,330),easing:"cubic-bezier(.1,.8,.2,1)"});
+
+  if(Math.random()<.15){
+    blackBlink.animate(
+      [{opacity:0},{opacity:rand(.10,.20),offset:.42},{opacity:0}],
+      {duration:rand(90,150),easing:"steps(2,end)"}
+    );
+  }
+}
+
+function apparition(){
+  if(!experienceStarted)return;
+  const im=new Image();
+  im.src=pick(apparitionSources);
+  im.className="apparition";
+
+  const [x,y]=pick(spots);
+  const rot=rand(-20,20);
+  const peak=rand(.42,.79);
+  const dur=rand(1050,1700);
+  const giant=Math.random()<.16;
+  const w=giant?rand(43,70):rand(17,37);
+
+  im.style.left=x+"vw";im.style.top=y+"vh";im.style.width=w+"vw";
+  layer.appendChild(im);
+
+  const px=W*(x/100)+(W*(w/100))/2;
+  const py=H*(y/100)+(W*(w/100))/2;
+  const flashSize=Math.min(W,H)*rand(.17,.27);
+
+  const anim=im.animate([
+    {
+      opacity:0,
+      transform:`translate(${rand(-72,72)}px,${rand(-46,46)}px) rotate(${rot}deg) scale(${rand(.48,.69)})`,
+      filter:"saturate(1.3) contrast(1.6) brightness(.24) blur(13px)"
+    },
+    {
+      opacity:peak,
+      offset:.085,
+      transform:`translate(${rand(-5,5)}px,${rand(-5,5)}px) rotate(${rot*.30}deg) scale(${rand(.96,1.10)})`,
+      filter:"saturate(1.55) contrast(1.45) brightness(.92) blur(0)"
+    },
+    {
+      opacity:peak*.44,
+      offset:.18,
+      transform:`translate(${rand(-17,17)}px,${rand(-12,12)}px) rotate(${rot*.12}deg) scale(${rand(1.05,1.18)})`,
+      filter:"saturate(1.48) contrast(1.78) brightness(.48) blur(1.5px)"
+    },
+    {
+      opacity:peak*.92,
+      offset:.31,
+      transform:`translate(${rand(-3,3)}px,${rand(-3,3)}px) rotate(${-rot*.10}deg) scale(${rand(1.16,1.32)})`,
+      filter:"saturate(1.62) contrast(1.54) brightness(.82) blur(0)"
+    },
+    {
+      opacity:peak*.53,
+      offset:.48,
+      transform:`translate(${rand(-6,6)}px,${rand(-5,5)}px) rotate(${-rot*.05}deg) scale(${rand(1.23,1.38)})`,
+      filter:"saturate(1.55) contrast(1.45) brightness(.64) blur(.5px)"
+    },
+    {
+      opacity:peak*.12,
+      offset:.67,
+      transform:`translate(${rand(-29,29)}px,${rand(-21,21)}px) rotate(${-rot*.35}deg) scale(${rand(1.38,1.58)})`,
+      filter:"saturate(1.45) contrast(1.88) brightness(.31) blur(2px)"
+    },
+    {
+      opacity:0,
+      transform:`translate(${rand(-82,82)}px,${rand(-58,58)}px) rotate(${-rot*.65}deg) scale(${rand(1.58,1.90)})`,
+      filter:"saturate(1.35) contrast(1.7) brightness(.18) blur(15px)"
+    }
+  ],{
+    duration:dur,
+    easing:"cubic-bezier(.05,.82,.18,1)",
+    fill:"forwards"
+  });
+
+  if(Math.random()<.42){
+    const ghost=im.cloneNode();
+    layer.appendChild(ghost);
+    ghost.animate([
+      {opacity:0,transform:"translate(0,0) scale(.8)"},
+      {opacity:peak*.16,offset:.16,transform:`translate(${rand(10,25)}px,${rand(-8,8)}px) scale(1.02)`},
+      {opacity:peak*.07,offset:.36,transform:`translate(${rand(18,38)}px,${rand(-11,11)}px) scale(1.16)`},
+      {opacity:0,transform:`translate(${rand(26,55)}px,${rand(-17,17)}px) scale(1.43)`}
+    ],{
+      duration:dur*.80,easing:"ease-out",fill:"forwards"
+    }).finished.finally(()=>ghost.remove());
+  }
+
+  localizedFlash(px,py,flashSize);
+  if(giant || Math.random()<.34) tripKick(giant?rand(1.05,1.42):rand(.55,.92));
+  imageSoundCue();
+  anim.finished.finally(()=>im.remove());
+}
+
+function collageVision(){
+  if(!experienceStarted)return;
+  tripKick(rand(1.08,1.42),rand(900,1500));
+  fullVision.animate([
+    {opacity:0,transform:"scale(1.06)",filter:"contrast(1.25) saturate(1.2) brightness(.28) blur(8px)"},
+    {opacity:.27,offset:.16,transform:`scale(1.01) translate(${rand(-8,8)}px,${rand(-5,5)}px)`,filter:"contrast(1.34) saturate(1.3) brightness(.58) blur(0)"},
+    {opacity:.07,offset:.32,transform:"scale(1.025)"},
+    {opacity:.22,offset:.46,transform:"scale(1.04)"},
+    {opacity:0,transform:"scale(1.11)",filter:"contrast(1.3) brightness(.22) blur(10px)"}
+  ],{
+    duration:rand(1000,1500),easing:"cubic-bezier(.08,.78,.2,1)"
+  });
+}
+
+function visualSchedule(){
+  if(!experienceStarted)return;
+  apparition();
+
+  const now=performance.now();
+  const surge=now<intensityUntil;
+  const lull=now<lullUntil;
+
+  if(!lull && Math.random()<(surge?.72:.46))
+    setTimeout(apparition,rand(70,240));
+
+  if(!lull && Math.random()<(surge?.36:.15))
+    setTimeout(apparition,rand(210,430));
+
+  if(Math.random()<(surge?.20:.075))
+    setTimeout(collageVision,rand(70,320));
+
+  const next=lull?rand(1450,2500):surge?rand(340,650):rand(660,1280);
+  setTimeout(visualSchedule,next);
+}
+
+/* ================================================================
+   CENTER IMAGE CYCLER
+   Add cycle/1.png, cycle/2.png, ... indefinitely.
+   Supported extensions: png jpg jpeg webp gif.
+   ================================================================ */
+const centerWrap=document.getElementById("centerWrap");
+const fallbackMonster=document.getElementById("fallbackMonster");
+const illusionImage=document.getElementById("illusionImage");
+let cycleImages=[];
+let cycleIndex=0;
+let cycleDelay=1850;
+let illusionSrc=null;
+let illusionShown=false;
+
+function tryImage(url){
+  return new Promise(resolve=>{
+    const im=new Image();
+    im.onload=()=>resolve(url);
+    im.onerror=()=>resolve(null);
+    im.src=url;
+  });
+}
+async function discoverIllusionImage(){
+  const exts=["png","jpg","jpeg","webp","gif"];
+  const stems=[
+    "illusion/illusion",
+    "illusion",
+    "assets/illusion",
+    "cycle/illusion"
+  ];
+  for(const stem of stems){
+    for(const ext of exts){
+      const hit=await tryImage(`${stem}.${ext}`);
+      if(hit)return hit;
+    }
+  }
+  return null;
+}
+async function discoverCycleImages(){
+  const exts=["png","jpg","jpeg","webp","gif"];
+  const found=[];
+  const seen=new Set();
+
+  async function tryStem(stem){
+    for(const ext of exts){
+      const hit=await tryImage(`cycle/${stem}.${ext}`);
+      if(hit && !seen.has(hit)){
+        seen.add(hit);found.push(hit);return true;
+      }
+    }
+    return false;
+  }
+
+  /* You can keep the original easy 1.jpg / 2.png / 3.webp naming,
+     OR drop in the batch names directly without renaming them. */
+  const named=[
+    "eyes1","eyes3","eyes5","eyes6",
+    "faces1","paraidolia1","paraidolia2","paraidolia5","paraidolia7"
+  ];
+  for(const stem of named)await tryStem(stem);
+
+  let misses=0;
+  for(let n=1;n<=250;n++){
+    const hit=await tryStem(String(n));
+    if(hit){misses=0}
+    else{
+      misses++;
+      if(found.length && misses>=8)break;
+    }
+  }
+  return found;
+}
+function revealIllusionAtMaxSpeed(){
+  if(illusionShown || !illusionSrc)return;
+  illusionShown=true;
+  illusionImage.src=illusionSrc;
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>illusionImage.classList.add("visible"));
+  });
+}
+function startCenterCycle(){
+  if(!cycleImages.length)return;
+
+  fallbackMonster.style.display="none";
+  const slots=[new Image(),new Image()];
+  slots.forEach(im=>{
+    im.className="center-img";
+    centerWrap.appendChild(im);
+  });
+
+  let active=0;
+  slots[0].src=cycleImages[0];
+  slots[0].classList.add("active");
+
+  function step(){
+    if(!experienceStarted)return;
+    cycleIndex=(cycleIndex+1)%cycleImages.length;
+    const next=1-active;
+    slots[next].src=cycleImages[cycleIndex];
+    slots[next].classList.add("active");
+    slots[active].classList.remove("active");
+    active=next;
+
+    /* Start slow, accelerate continuously, then lock at a true constant
+       maximum speed instead of continuing to jitter around it. */
+    cycleDelay=Math.max(105,cycleDelay*.885);
+    const atMaxSpeed=cycleDelay<=108;
+    const nextDelay=atMaxSpeed?105:cycleDelay*rand(.96,1.04);
+    if(atMaxSpeed)revealIllusionAtMaxSpeed();
+    setTimeout(step,nextDelay);
+  }
+  setTimeout(step,cycleDelay);
+}
+
+/* ================================================================
+   WEB AUDIO ENGINE
+   The warning-gate click starts the whole system.
+   ================================================================ */
+const AUDIO_FILES={
+  ambientA:"audio/ambient-a.mp3",
+  ambientB:"audio/ambient-b.mp3",
+  whisperSwarm:"audio/whisper-swarm.mp3",
+  choirChaos:"audio/choir-chaos.mp3",
+  choirSting:"audio/choir-sting.mp3",
+  whisperClose:"audio/whisper-close.mp3",
+  bells:"audio/bells.mp3",
+  teeth:"audio/teeth.mp3",
+  violin:"audio/violin-scrape.mp3",
+  bass:"audio/bass-impact.mp3",
+  exhale:"audio/exhale.mp3",
+  maleWhisper:"audio/male-whisper.mp3",
+  suffocating:"audio/suffocating.mp3",
+  reversed:"audio/reversed-whispers.mp3",
+  metal:"audio/metal-drag.mp3",
+  scream:"audio/distant-scream.mp3",
+  crying:"audio/crying.mp3"
+};
+const OPTIONAL_AUDIO_FILES={
+  whisperClose2:"audio/whisper-close2.mp3"
+};
+const AMBIENT_CHUNKS=[
+  "audio/ambient-full-01.mp3",
+  "audio/ambient-full-02.mp3",
+  "audio/ambient-full-03.mp3",
+  "audio/ambient-full-04.mp3",
+  "audio/ambient-full-05.mp3",
+  "audio/ambient-full-06.mp3",
+  "audio/ambient-full-07.mp3",
+  "audio/ambient-full-08.mp3",
+  "audio/ambient-full-09.mp3"
+];
+const AMBIENT_CROSSFADE=5.0;
+const AMBIENT_LEVEL=.14;
+
+let audioCtx=null;
+let master=null;
+let muteGain=null;
+let compressor=null;
+const buffers={};
+const htmlFallback={};
+const activeHtmlAudio=new Set();
+let ambientChunkTimer=null;
+let loadCount=0;
+let loadedCount=0;
+let localFileMode=(location.protocol==="file:");
+let audioStartedAt=0;
+let audioLullUntil=0;
+const cooldowns={};
+
+function setLoadState(text,error=false){
+  const el=document.getElementById("loadState");
+  if(!el)return;
+  el.textContent=text;
+  el.classList.toggle("error",error);
+}
+
+/* ----------------------------------------------------------------
+   PUBLISH BUILD — audio debugger removed.
+   Keep no-op hooks because the playback engine calls them internally.
+   ---------------------------------------------------------------- */
+function debugStart(){return null}
+function debugStop(){}
+
+/* ----------------------------------------------------------------
+   AUDIO LOADING
+   ---------------------------------------------------------------- */
+async function loadOneRequired(name,url){
+  if(localFileMode){
+    const a=new Audio(url);
+    a.preload="auto";
+    a.volume=0;
+    htmlFallback[name]=a;
+    let ok=false;
+    try{
+      ok=await new Promise(resolve=>{
+        let finished=false;
+        const done=v=>{if(finished)return;finished=true;resolve(v)};
+        a.addEventListener("canplaythrough",()=>done(true),{once:true});
+        a.addEventListener("loadeddata",()=>done(true),{once:true});
+        a.addEventListener("error",()=>done(false),{once:true});
+        setTimeout(()=>done(a.readyState>=2),1600);
+        a.load();
+      });
+    }catch(e){}
+    if(ok)loadedCount++;
+    return ok;
+  }
+  try{
+    const r=await fetch(new URL(url,location.href),{cache:"force-cache"});
+    if(!r.ok)throw new Error(`${r.status} ${url}`);
+    const arr=await r.arrayBuffer();
+    buffers[name]=await audioCtx.decodeAudioData(arr.slice(0));
+    loadedCount++;
+    return true;
+  }catch(e){
+    console.error("Audio load failed:",name,url,e);
+    return false;
+  }
+}
+async function loadOneOptional(name,url){
+  if(localFileMode){
+    const a=new Audio(url);a.preload="metadata";a.volume=0;
+    try{
+      const ok=await new Promise(resolve=>{
+        let finished=false;
+        const done=v=>{if(finished)return;finished=true;resolve(v)};
+        a.addEventListener("loadedmetadata",()=>done(true),{once:true});
+        a.addEventListener("loadeddata",()=>done(true),{once:true});
+        a.addEventListener("error",()=>done(false),{once:true});
+        setTimeout(()=>done(a.readyState>=1),900);
+        a.load();
+      });
+      if(ok){htmlFallback[name]=a;console.info("Optional audio found:",url);return true}
+    }catch(e){}
+    return false;
+  }
+  try{
+    const r=await fetch(new URL(url,location.href),{cache:"force-cache"});
+    if(!r.ok)return false;
+    const arr=await r.arrayBuffer();
+    buffers[name]=await audioCtx.decodeAudioData(arr.slice(0));
+    console.info("Optional audio found:",url);
+    return true;
+  }catch(e){return false}
+}
+async function initAudio(){
+  audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  await audioCtx.resume();
+
+  compressor=audioCtx.createDynamicsCompressor();
+  compressor.threshold.value=-18;
+  compressor.knee.value=20;
+  compressor.ratio.value=3.2;
+  compressor.attack.value=.008;
+  compressor.release.value=.38;
+
+  master=audioCtx.createGain();
+  master.gain.value=.94;
+  muteGain=audioCtx.createGain();
+  muteGain.gain.value=1;
+  master.connect(compressor);compressor.connect(muteGain);muteGain.connect(audioCtx.destination);
+
+  const entries=Object.entries(AUDIO_FILES);
+  loadCount=0;loadedCount=0;
+  for(const [name,url] of entries){
+    await loadOneRequired(name,url);
+    loadCount++;
+    setLoadState(`AUDIO ${Math.round(loadCount/entries.length*100)}%`);
+  }
+  for(const [name,url] of Object.entries(OPTIONAL_AUDIO_FILES)) await loadOneOptional(name,url);
+
+  if(loadedCount===0){
+    setLoadState(localFileMode
+      ?"NO AUDIO COULD LOAD — try a local web server or GitHub Pages"
+      :"AUDIO FILES NOT FOUND — make sure /audio sits beside index.html",true);
+    return false;
+  }
+  setLoadState(`AUDIO READY — ${loadedCount}/${entries.length} REQUIRED FILES`);
+  return true;
+}
+
+function audioObj(name){return localFileMode?htmlFallback[name]:buffers[name]}
+function audioDuration(name,fallback=5){
+  const b=audioObj(name);
+  const d=b&&Number.isFinite(b.duration)?b.duration:0;
+  return d>0?d:fallback;
+}
+function safeSlice(name,minDur,maxDur,{head=0,tail=0}={}){
+  const total=audioDuration(name,Math.max(maxDur+head+tail+1,8));
+  const usableStart=Math.max(0,head);
+  const usableEnd=Math.max(usableStart+.15,total-Math.max(0,tail));
+  const available=Math.max(.15,usableEnd-usableStart);
+  const duration=Math.min(rand(minDur,maxDur),available);
+  const maxOffset=Math.max(usableStart,usableEnd-duration);
+  return {offset:rand(usableStart,maxOffset),duration};
+}
+function cooldownReady(key,minGapMs){
+  const now=performance.now();
+  if((cooldowns[key]||0)>now)return false;
+  cooldowns[key]=now+minGapMs;
+  return true;
+}
+
+/* Local file:// playback uses the exact same gain values as hosted WebAudio.
+   Previous versions multiplied fallback gain, making balancing inconsistent. */
+function playHtmlFallback(name,{gain=.10,offset=0,duration=null,rate=1,fadeIn=.03,fadeOut=.20,delay=0,pan=0}={}){
+  const template=htmlFallback[name];
+  if(!template)return null;
+  const a=new Audio(template.src);
+  a.preload="auto";a.playbackRate=rate;a.volume=0;a.muted=muted;
+  try{a.currentTime=Math.max(0,offset)}catch(e){}
+  activeHtmlAudio.add(a);
+  let dbg=null;
+  const cleanup=()=>{activeHtmlAudio.delete(a);if(dbg!=null)debugStop(dbg)};
+  a.addEventListener("ended",cleanup,{once:true});
+  a.addEventListener("error",cleanup,{once:true});
+
+  setTimeout(async()=>{
+    try{
+      await a.play();
+      dbg=debugStart(name,{gain,pan,offset,duration});
+      const target=clamp(gain,0,1);
+      const inMs=Math.max(30,fadeIn*1000);
+      const began=performance.now();
+      const fi=setInterval(()=>{
+        const p=clamp((performance.now()-began)/inMs,0,1);
+        a.volume=muted?0:target*p;
+        if(p>=1)clearInterval(fi);
+      },30);
+      if(duration!=null){
+        const fadeStart=Math.max(0,(duration-fadeOut)*1000);
+        setTimeout(()=>{
+          const startVol=a.volume;
+          const outMs=Math.max(60,fadeOut*1000);
+          const outStart=performance.now();
+          const fo=setInterval(()=>{
+            const p=clamp((performance.now()-outStart)/outMs,0,1);
+            a.volume=muted?0:startVol*(1-p);
+            if(p>=1){clearInterval(fo);a.pause();cleanup()}
+          },30);
+        },fadeStart);
+      }
+    }catch(e){console.error("HTML audio fallback failed:",name,e);cleanup()}
+  },delay*1000);
+  return a;
+}
+
+function playBuffer(name,{gain=.10,pan=0,offset=0,duration=null,rate=1,fadeIn=.03,fadeOut=.20,delay=0}={}){
+  if(!experienceStarted||!audioCtx)return null;
+  if(localFileMode)return playHtmlFallback(name,{gain,pan,offset,duration,rate,fadeIn,fadeOut,delay});
+  if(!buffers[name])return null;
+  const b=buffers[name];
+  offset=clamp(offset,0,Math.max(0,b.duration-.05));
+  const maxDur=Math.max(.05,b.duration-offset);
+  const dur=duration==null?maxDur:Math.min(duration,maxDur);
+  if(dur<=.03)return null;
+
+  const src=audioCtx.createBufferSource();src.buffer=b;src.playbackRate.value=rate;
+  const g=audioCtx.createGain();const p=audioCtx.createStereoPanner();p.pan.value=clamp(pan,-1,1);
+  src.connect(g);g.connect(p);p.connect(master);
+  const start=audioCtx.currentTime+delay;
+  const fi=Math.min(fadeIn,dur*.30),fo=Math.min(fadeOut,dur*.35);
+  g.gain.setValueAtTime(.0001,start);
+  g.gain.exponentialRampToValueAtTime(Math.max(.0002,gain),start+Math.max(.01,fi));
+  g.gain.setValueAtTime(Math.max(.0002,gain),Math.max(start+fi,start+dur-fo));
+  g.gain.exponentialRampToValueAtTime(.0001,start+dur);
+  let dbg=null;
+  setTimeout(()=>{dbg=debugStart(name,{gain,pan,offset,duration:dur})},delay*1000);
+  src.onended=()=>{if(dbg!=null)debugStop(dbg)};
+  try{src.start(start,offset,dur)}catch(e){}
+  return src;
+}
+
+/* ----------------------------------------------------------------
+   AMBIENCE
+
+   The full 63-minute ambience has been split into GitHub-friendly chunks.
+   Chunks 01-08 are 450 s long and start 445 s apart, so adjacent files
+   contain a 5-second overlap. The player crossfades exactly across that
+   overlap, reconstructing the original timeline without an audible cut.
+
+   If the chunk set is unavailable, the original ambient A/B beds remain as
+   a fallback so the page never loses its underlying atmosphere.
+   ---------------------------------------------------------------- */
+function waitForAudioReady(a,timeoutMs=5000){
+  return new Promise(resolve=>{
+    let done=false;
+    const finish=v=>{if(done)return;done=true;resolve(v)};
+    a.addEventListener("loadedmetadata",()=>finish(true),{once:true});
+    a.addEventListener("canplay",()=>finish(true),{once:true});
+    a.addEventListener("error",()=>finish(false),{once:true});
+    setTimeout(()=>finish(a.readyState>=1),timeoutMs);
+    try{a.load()}catch(e){finish(false)}
+  });
+}
+
+function fadeHtmlAudio(a,from,to,seconds,onDone){
+  const t0=performance.now();
+  const ms=Math.max(80,seconds*1000);
+  a.volume=muted?0:clamp(from,0,1);
+  const tick=()=>{
+    if(!experienceStarted){
+      try{a.pause()}catch(e){}
+      activeHtmlAudio.delete(a);
+      return;
+    }
+    const q=clamp((performance.now()-t0)/ms,0,1);
+    const v=from+(to-from)*q;
+    a.volume=muted?0:clamp(v,0,1);
+    if(q<1)requestAnimationFrame(tick);
+    else if(onDone)onDone();
+  };
+  requestAnimationFrame(tick);
+}
+
+function makeAmbientChunk(index){
+  const a=new Audio(AMBIENT_CHUNKS[index]);
+  a.preload="auto";
+  a.loop=false;
+  a.volume=0;
+  a.muted=muted;
+  return a;
+}
+
+async function tryStartAmbientChunks(){
+  if(!AMBIENT_CHUNKS.length)return false;
+
+  let index=0;
+  let current=makeAmbientChunk(index);
+  if(!(await waitForAudioReady(current,6000)))return false;
+
+  current.volume=muted?0:AMBIENT_LEVEL;
+  activeHtmlAudio.add(current);
+  try{await current.play()}catch(e){activeHtmlAudio.delete(current);return false}
+
+  let next=null;
+
+  function prepareNext(){
+    const nextIndex=(index+1)%AMBIENT_CHUNKS.length;
+    next=makeAmbientChunk(nextIndex);
+    /* Give the browser most of the current chunk to buffer the next one. */
+    try{next.load()}catch(e){}
+  }
+
+  function scheduleTransition(){
+    if(!experienceStarted)return;
+    const d=Number.isFinite(current.duration)&&current.duration>0?current.duration:450;
+    const remaining=Math.max(.25,d-current.currentTime-AMBIENT_CROSSFADE);
+    clearTimeout(ambientChunkTimer);
+    ambientChunkTimer=setTimeout(beginTransition,remaining*1000);
+  }
+
+  async function beginTransition(){
+    if(!experienceStarted)return;
+    const old=current;
+    const nextIndex=(index+1)%AMBIENT_CHUNKS.length;
+    if(!next)next=makeAmbientChunk(nextIndex);
+
+    /* Starting the second file at 0 here corresponds to the same point in
+       the original album as old.currentTime ~= old.duration - 5 seconds. */
+    next.volume=0;
+    next.muted=muted;
+    activeHtmlAudio.add(next);
+    try{
+      await next.play();
+    }catch(e){
+      activeHtmlAudio.delete(next);
+      /* Network hiccup: retry the transition instead of killing ambience. */
+      next=null;
+      ambientChunkTimer=setTimeout(beginTransition,800);
+      return;
+    }
+
+    fadeHtmlAudio(old,AMBIENT_LEVEL,0,AMBIENT_CROSSFADE,()=>{
+      try{old.pause()}catch(e){}
+      activeHtmlAudio.delete(old);
+    });
+    fadeHtmlAudio(next,0,AMBIENT_LEVEL,AMBIENT_CROSSFADE);
+
+    current=next;
+    index=nextIndex;
+    next=null;
+    prepareNext();
+
+    /* Schedule from the new chunk's own clock. This also tolerates a small
+       amount of browser/network startup delay without accumulating drift. */
+    setTimeout(scheduleTransition,150);
+  }
+
+  prepareNext();
+  scheduleTransition();
+  return true;
+}
+
+async function startAmbientBed(){
+  if(await tryStartAmbientChunks())return;
+
+  let side=0;
+  function launch(){
+    if(!experienceStarted)return;
+    const name=side?"ambientB":"ambientA";side=1-side;
+    const b=audioObj(name);
+    if(b){
+      const d=audioDuration(name,60);
+      playBuffer(name,{gain:rand(.125,.16),pan:rand(-.08,.08),duration:d,fadeIn:1.5,fadeOut:7.0,rate:rand(.988,1.012)});
+      setTimeout(launch,Math.max(20000,(d-7.2)*1000));
+    }else setTimeout(launch,3000);
+  }
+  launch();
+}
+
+/* ----------------------------------------------------------------
+   PSYCHOLOGICAL SOUND LAYERS
+
+   1. constant world = ambience
+   2. presence = breath / ear-whispers
+   3. distance = layered swarm, reversed language
+   4. motif = bells / dragging metal
+   5. human fragility = suffocation / crying
+   6. hidden personal trace = male voice
+   7. rupture = choir chaos + rare harsh accents, followed by silence
+   ---------------------------------------------------------------- */
+function inAudioLull(){return performance.now()<audioLullUntil}
+
+function playCloseWhisper(){
+  const use2=!!audioObj("whisperClose2") && Math.random()<.65;
+  const name=use2?"whisperClose2":"whisperClose";
+  const sl=safeSlice(name,.30,.88,{tail:.12});
+  playBuffer(name,{gain:rand(.055,.09),pan:rand(-.92,.92),offset:sl.offset,duration:sl.duration,rate:rand(.92,1.06),fadeIn:.008,fadeOut:.10});
+}
+function playExhale(){
+  if(!cooldownReady("exhale",4200))return;
+  const sl=safeSlice("exhale",.62,1.55,{tail:.03});
+  playBuffer("exhale",{gain:rand(.14,.22),pan:rand(-.95,.95),offset:sl.offset,duration:sl.duration,rate:rand(.92,1.035),fadeIn:.01,fadeOut:.16});
+}
+function layeredWhisperScene(strength=1){
+  if(inAudioLull())return;
+  const layers=Math.random()<.30?3:2;
+  for(let i=0;i<layers;i++){
+    /* Never touch the silent last five seconds of whisper-swarm. */
+    const sl=safeSlice("whisperSwarm",2.0,5.6,{tail:5.0});
+    const delay=i===0?rand(0,.35):rand(.45,2.1);
+    const base=i===0?rand(.032,.052):rand(.018,.040);
+    playBuffer("whisperSwarm",{
+      gain:base*strength,pan:rand(-.88,.88),offset:sl.offset,duration:sl.duration,
+      rate:rand(.94,1.035),fadeIn:rand(.18,.55),fadeOut:rand(.40,.85),delay
+    });
+  }
+  if(Math.random()<.34){
+    const sl=safeSlice("reversed",1.7,4.3,{tail:.25});
+    playBuffer("reversed",{gain:rand(.015,.032)*strength,pan:rand(-.72,.72),offset:sl.offset,duration:sl.duration,rate:rand(.94,1.04),fadeIn:.28,fadeOut:.55,delay:rand(.6,2.2)});
+  }
+  if(Math.random()<.33 && audioObj("maleWhisper")){
+    const sl=safeSlice("maleWhisper",1.0,2.7,{tail:.25});
+    playBuffer("maleWhisper",{gain:rand(.022,.042)*strength,pan:rand(-.75,.75),offset:sl.offset,duration:sl.duration,rate:rand(.96,1.025),fadeIn:.18,fadeOut:.35,delay:rand(1.0,2.8)});
+  }
+}
+
+/* Visuals get subtle close-presence cues only. Harsh sounds no longer fire
+   every time an apparition appears. */
+let lastImageCueAt=0;
+function imageSoundCue(){
+  if(!audioCtx||inAudioLull())return;
+  const now=performance.now();
+  if(now-lastImageCueAt<2600)return;
+  lastImageCueAt=now;
+  const x=Math.random();
+  if(x<.42)playExhale();
+  else if(x<.70)playCloseWhisper();
+  else if(x<.83){
+    const sl=safeSlice("reversed",.45,1.15,{tail:.3});
+    playBuffer("reversed",{gain:rand(.018,.032),pan:rand(-.85,.85),offset:sl.offset,duration:sl.duration,rate:rand(.95,1.04),fadeIn:.03,fadeOut:.15});
+  }else if(x<.89){
+    const sl=safeSlice("metal",.35,.80,{head:.8,tail:.4});
+    playBuffer("metal",{gain:rand(.014,.026),pan:rand(-.55,.55),offset:sl.offset,duration:sl.duration,rate:rand(.95,1.03),fadeIn:.02,fadeOut:.15});
+  }
+  /* remaining probability is deliberate silence */
+}
+
+function presenceSchedule(){
+  if(!experienceStarted)return;
+  if(!inAudioLull()){
+    const x=Math.random();
+    if(x<.52)playExhale();
+    else if(x<.78)playCloseWhisper();
+    else if(x<.94)layeredWhisperScene(.85);
+  }
+  setTimeout(presenceSchedule,rand(6500,13500));
+}
+function distantWhisperSchedule(){
+  if(!experienceStarted)return;
+  if(!inAudioLull()&&Math.random()<.84)layeredWhisperScene(rand(.78,1.05));
+  setTimeout(distantWhisperSchedule,rand(12500,24500));
+}
+function bellMotifSchedule(){
+  if(!experienceStarted)return;
+  if(!inAudioLull()&&cooldownReady("bells",12000)){
+    const sl=safeSlice("bells",5.0,10.5,{head:1.65,tail:.25});
+    playBuffer("bells",{gain:rand(.034,.058),pan:rand(-.22,.22),offset:sl.offset,duration:sl.duration,rate:rand(.975,1.018),fadeIn:.20,fadeOut:.75});
+    if(Math.random()<.22){
+      playBuffer("bells",{gain:rand(.010,.020),pan:rand(-.55,.55),offset:sl.offset,duration:Math.min(sl.duration,6),rate:rand(.96,1.025),fadeIn:.35,fadeOut:.80,delay:rand(.8,1.8)});
+    }
+  }
+  setTimeout(bellMotifSchedule,rand(17000,31000));
+}
+function environmentSchedule(){
+  if(!experienceStarted)return;
+  if(!inAudioLull()&&Math.random()<.78&&cooldownReady("metal",12000)){
+    const sl=safeSlice("metal",1.2,3.6,{head:.8,tail:.5});
+    playBuffer("metal",{gain:rand(.022,.045),pan:rand(-.62,.62),offset:sl.offset,duration:sl.duration,rate:rand(.94,1.025),fadeIn:.10,fadeOut:.40});
+  }
+  setTimeout(environmentSchedule,rand(18500,39000));
+}
+function bodySchedule(){
+  if(!experienceStarted)return;
+  if(!inAudioLull()){
+    if(Math.random()<.69&&cooldownReady("suffocating",18000)){
+      const sl=safeSlice("suffocating",2.2,5.6,{tail:.35});
+      playBuffer("suffocating",{gain:rand(.032,.062),pan:rand(-.58,.58),offset:sl.offset,duration:sl.duration,rate:rand(.96,1.025),fadeIn:.18,fadeOut:.55});
+    }else if(cooldownReady("crying",36000)){
+      const sl=safeSlice("crying",4.0,9.0,{tail:.8});
+      playBuffer("crying",{gain:rand(.018,.038),pan:rand(-.68,.68),offset:sl.offset,duration:sl.duration,rate:rand(.98,1.018),fadeIn:.35,fadeOut:1.0});
+    }
+  }
+  setTimeout(bodySchedule,rand(23000,47000));
+}
+function hiddenMaleSchedule(){
+  if(!experienceStarted)return;
+  if(!inAudioLull()&&cooldownReady("maleWhisper",20000)){
+    const sl=safeSlice("maleWhisper",1.2,4.5,{tail:.25});
+    playBuffer("maleWhisper",{gain:rand(.032,.060),pan:rand(-.86,.86),offset:sl.offset,duration:sl.duration,rate:rand(.95,1.025),fadeIn:.14,fadeOut:.38});
+    if(Math.random()<.20){
+      const r=safeSlice("reversed",1.1,2.4,{tail:.25});
+      playBuffer("reversed",{gain:rand(.010,.020),pan:-rand(-.70,.70),offset:r.offset,duration:r.duration,rate:rand(.96,1.02),fadeIn:.20,fadeOut:.40,delay:rand(.4,1.3)});
+    }
+  }
+  setTimeout(hiddenMaleSchedule,rand(26000,52000));
+}
+function rareTeethSchedule(){
+  if(!experienceStarted)return;
+  if(!inAudioLull()&&Math.random()<.62&&cooldownReady("teeth",65000)){
+    const sl=safeSlice("teeth",.32,.78,{tail:.5});
+    playBuffer("teeth",{gain:rand(.010,.019),pan:rand(-.72,.72),offset:sl.offset,duration:sl.duration,rate:rand(.96,1.035),fadeIn:.01,fadeOut:.12});
+  }
+  setTimeout(rareTeethSchedule,rand(76000,145000));
+}
+
+/* Choir chaos is a true rupture, not background decoration. First one is
+   deliberately delayed so the user has time to acclimatize before the site
+   suddenly sounds much larger than it did before. */
+function ruptureSchedule(){
+  if(!experienceStarted)return;
+  if(!inAudioLull()&&cooldownReady("rupture",38000)){
+    const sl=safeSlice("choirChaos",3.6,7.6,{head:.3,tail:.7});
+    intensityUntil=performance.now()+rand(6500,9800);
+    playBuffer("choirChaos",{gain:rand(.045,.072),pan:rand(-.22,.22),offset:sl.offset,duration:sl.duration,rate:rand(.975,1.018),fadeIn:rand(.15,.32),fadeOut:rand(.45,.75)});
+
+    /* Occasionally let a quieter, offset copy bloom behind the main choir.
+       It should feel like more voices were hiding in the room, not like a repeated SFX. */
+    if(Math.random()<.30){
+      const sl2=safeSlice("choirChaos",2.6,5.2,{head:.3,tail:.7});
+      playBuffer("choirChaos",{gain:rand(.014,.026),pan:rand(-.72,.72),offset:sl2.offset,duration:sl2.duration,rate:rand(.965,1.025),fadeIn:rand(.28,.52),fadeOut:rand(.55,.90),delay:rand(.7,2.2)});
+    }
+
+    if(Math.random()<.38){
+      const v=safeSlice("violin",.28,.72,{tail:.2});
+      playBuffer("violin",{gain:rand(.014,.029),pan:rand(-.38,.38),offset:v.offset,duration:v.duration,rate:rand(.94,1.03),fadeIn:.01,fadeOut:.10,delay:rand(.4,2.2)});
+    }
+    if(Math.random()<.34){
+      const b=safeSlice("bass",.48,1.15,{tail:.15});
+      playBuffer("bass",{gain:rand(.022,.040),pan:rand(-.12,.12),offset:b.offset,duration:b.duration,rate:rand(.96,1.015),fadeIn:.005,fadeOut:.18,delay:rand(1.2,3.6)});
+    }
+    if(Math.random()<.22){
+      const s=safeSlice("scream",1.0,2.5,{tail:.5});
+      playBuffer("scream",{gain:rand(.012,.025),pan:rand(-.75,.75),offset:s.offset,duration:s.duration,rate:rand(.95,1.01),fadeIn:.10,fadeOut:.55,delay:rand(1.4,4.4)});
+    }
+    if(Math.random()<.16){
+      /* choir-sting has useless silence at the end: never use the last 2s. */
+      const cs=safeSlice("choirSting",.38,.85,{tail:2.0});
+      playBuffer("choirSting",{gain:rand(.018,.034),pan:rand(-.18,.18),offset:cs.offset,duration:cs.duration,rate:rand(.98,1.02),fadeIn:.01,fadeOut:.09,delay:rand(.7,3.4)});
+    }
+
+    const quietAfter=rand(7200,12500);
+    setTimeout(()=>{
+      intensityUntil=0;
+      audioLullUntil=performance.now()+quietAfter;
+      lullUntil=audioLullUntil;
+    },Math.max(4500,(sl.duration+1.1)*1000));
+  }
+  setTimeout(ruptureSchedule,rand(38000,68000));
+}
+
+/* Keep the existing visual tension concept, but audio escalation is now
+   driven by ruptureSchedule rather than many independent harsh clips. */
+function tensionDirector(){
+  if(!experienceStarted)return;
+  if(!inAudioLull()&&Math.random()<.42){
+    intensityUntil=performance.now()+rand(4500,7500);
+    tripKick(rand(.85,1.15),rand(1000,1700));
+    if(Math.random()<.58){
+      const r=safeSlice("reversed",2.2,4.8,{tail:.35});
+      playBuffer("reversed",{gain:rand(.024,.042),pan:rand(-.42,.42),offset:r.offset,duration:r.duration,rate:rand(.96,1.025),fadeIn:.30,fadeOut:.62});
+    }
+  }
+  setTimeout(tensionDirector,rand(33000,68000));
+}
+
+
+/* Slow perceptual drift: rare bends even outside explicit surges.
+   This makes the page feel chemically/physically unstable without becoming
+   a constant high-frequency flash pattern. */
+function tripDriftSchedule(){
+  if(!experienceStarted)return;
+  if(performance.now()>=lullUntil && Math.random()<.58){
+    tripKick(rand(.40,.72),rand(1100,2400));
+  }
+  setTimeout(tripDriftSchedule,rand(4200,9000));
+}
+
+/* ================================================================
+   ENTRY / MUTE
+   ================================================================ */
+const enter=document.getElementById("enter");
+const gate=document.getElementById("gate");
+const muteButton=document.getElementById("mute");
+
+let cyclePromise=discoverCycleImages();
+let illusionPromise=discoverIllusionImage();
+
+enter.addEventListener("click",async()=>{
+  enter.disabled=true;
+  enter.textContent="LOADING AUDIO…";
+
+  let ok=false;
+  try{ok=await initAudio()}catch(e){
+    console.error(e);
+    setLoadState("AUDIO ENGINE ERROR — OPEN DEVTOOLS FOR DETAILS",true);
+  }
+
+  if(!ok){
+    enter.disabled=false;
+    enter.textContent="RETRY AUDIO";
+    return;
+  }
+
+  cycleImages=await cyclePromise;
+  illusionSrc=await illusionPromise;
+
+  experienceStarted=true;
+  audioStartedAt=performance.now();
+  last=audioStartedAt;
+
+  gate.classList.add("hidden");
+
+  startCenterCycle();
+  startAmbientBed();
+
+  /* Begin with distance, not a jump-scare: overlapping swarm voices at
+     different gains / pans, and never the silent final 5 seconds. */
+  setTimeout(()=>layeredWhisperScene(.82),700);
+
+  setTimeout(visualSchedule,350);
+  setTimeout(presenceSchedule,rand(3500,6500));
+  setTimeout(distantWhisperSchedule,rand(7000,12000));
+  setTimeout(bellMotifSchedule,rand(9000,16000));
+  setTimeout(environmentSchedule,rand(12000,22000));
+  setTimeout(bodySchedule,rand(16000,28000));
+  setTimeout(hiddenMaleSchedule,rand(20000,36000));
+  setTimeout(rareTeethSchedule,rand(70000,110000));
+  setTimeout(ruptureSchedule,rand(40000,58000));
+  setTimeout(tensionDirector,rand(22000,38000));
+  setTimeout(tripDriftSchedule,rand(2800,5200));
+});
+
+muteButton.addEventListener("click",()=>{
+  muted=!muted;
+  muteButton.textContent=muted?"🔇":"🔊";
+
+  /* Hosted mode: every WebAudio source passes through muteGain. */
+  if(muteGain&&audioCtx){
+    const now=audioCtx.currentTime;
+    muteGain.gain.cancelScheduledValues(now);
+    muteGain.gain.setTargetAtTime(muted?0:1,now,.025);
+  }
+
+  /* Local file:// mode: playHtmlFallback creates Audio clones that are not
+     attached to the DOM, so querySelectorAll('audio') could never mute them.
+     Track the live clones explicitly and flip their muted property instantly. */
+  activeHtmlAudio.forEach(a=>{
+    try{a.muted=muted}catch(e){}
+  });
+  Object.values(htmlFallback).forEach(a=>{
+    try{a.muted=muted}catch(e){}
+  });
+});</script>
+</body>
+</html>

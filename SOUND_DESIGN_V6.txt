@@ -1,0 +1,12 @@
+ODY.MONSTER — PUBLISH SOUND V6
+
+Changes from V5:
+- Removed the on-page / keyboard audio debugger for publishing.
+- Picture-triggered sound cues are still active, but remain restrained:
+  exhale / close whisper / reversed whisper / rare metal only.
+- Male whisper (Ody's voice) is slightly more likely and a little louder,
+  while remaining a hidden trace rather than a foreground narrator.
+- Choir chaos remains a rupture event, but occurs a little more often.
+- Some choir ruptures now add one quiet, delayed secondary choir layer
+  to create a larger mixed-voices field without constant choir spam.
+- All other V5 hierarchy / cooldown logic is preserved.
