@@ -1,0 +1,10 @@
+OPTIONAL AUDIO FILES
+
+ambient-full.mp3
+  If present, the site prefers this as the continuous ambient bed instead of ambient-a.mp3 / ambient-b.mp3.
+  This is the easiest place to put the full ambience track/album you want to use.
+
+whisper-close2.mp3
+  If present, the site uses it as an additional close-to-the-ear whisper source, primarily in short fragments.
+
+moan.mp3 is intentionally NOT used or included in this version.
